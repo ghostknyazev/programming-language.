@@ -1,0 +1,154 @@
+// МАЛЫШЕНКО ЯРОСЛАВ КМБ-2 ВАРИАНТ 5 
+
+open System
+
+// РЕШЕНИЕ ЗАДАЧИ 1
+// Функция для нахождения минимальной цифры в числе
+let minDigit (n: int) : int =
+    n.ToString() // Преобразуем число в строку
+    |> Seq.map Char.GetNumericValue // Получаем числовые значения каждого символа
+    |> Seq.map int // Преобразуем значения в целые числа
+    |> Seq.min // Находим минимальное значение
+
+// ОБЩЕЕ РЕШЕНИЕ 
+// Функция для обработки ввода пользователя
+let rec getInput () =
+    Console.WriteLine("Введите натуральные числа через пробел (или 'q' для выхода в главное меню):") // вывод комментария пользователю 
+    let input = Console.ReadLine() // Читаем ввод пользователя
+    
+    if input.Trim().ToLower() = "q" then
+        // Возвращаемся в главное меню
+        Console.WriteLine("Возвращение в главное меню...")
+        []
+    else
+        // Разделяем ввод по пробелам и обрабатываем каждое значение
+        let numbers = 
+            input.Split(' ')
+            |> Seq.fold (fun acc s ->
+                match Int32.TryParse(s.Trim()) with
+                | (true, n) when n > 0 -> n :: acc // Если введено натуральное число, добавляем его в список
+                | _ -> 
+                    // Если ввод некорректен, выводим сообщение об ошибке
+                    Console.WriteLine("'" + s + "' не является натуральным числом или меньше или равно нулю.") // вывод комментария пользователю 
+                    acc) []
+        
+        if List.isEmpty numbers then
+            Console.WriteLine("Не были введены натуральные числа.")  // вывод комментария пользователю 
+            getInput () // Запускаем цикл снова для следующего ввода
+        else
+            Console.WriteLine("Введенные натуральные числа: " + String.Join(", ", numbers)) // Выводим список введенных чисел
+            numbers // Возвращаем список введенных чисел
+
+// Функция для генерации случайных чисел
+let generateRandomNumbers count =
+    let rnd = Random() // Создаем экземпляр генератора случайных чисел
+    [ for _ in 1 .. count -> rnd.Next(1, 100) ] // Генерируем список случайных чисел от 1 до 99
+
+// РЕШЕНИЕ ЗАДАЧИ 2 
+// Функция для подсчета количества элементов в списке, содержащих заданную цифру
+let countElementsWithDigit (numbers: int list) (digit: char) : (int * int list) =
+    let digitString = digit.ToString() // Преобразуем цифру в строку для сравнения
+    List.fold (fun (count, foundNumbers) n ->
+        if n.ToString().Contains(digitString) then
+            (count + 1, n :: foundNumbers) // Увеличиваем счетчик и добавляем число в список
+        else
+            (count, foundNumbers) // Возвращаем текущий счетчик и список, если цифра не найдена
+    ) (0, []) numbers // Начинаем с 0 и пустого списка
+
+// Функция для поиска цифры в числах
+let searchDigitInNumbers numbers =
+    // Запрос цифры для поиска
+    Console.Write("Введите цифру для поиска (0-9): ") // вывод комментария пользователю 
+    let digitInput = Console.ReadLine()
+
+    match digitInput with
+    | input when input.Length = 1 && Char.IsDigit input.[0] -> 
+        // Если введена одна цифра, выполняем поиск
+        let count, foundNumbers = countElementsWithDigit numbers input.[0]
+        Console.WriteLine($"Количество элементов, содержащих цифру {input.[0]}: {count}") // вывод комментария пользователю 
+        if foundNumbers.Length > 0 then
+            Console.WriteLine("Числа, содержащие эту цифру: " + String.Join(", ", foundNumbers))
+        else
+            Console.WriteLine("Нет чисел, содержащих эту цифру.") // вывод комментария пользователю 
+    | _ -> 
+        // Если ввод некорректен, выводим сообщение об ошибке
+        Console.WriteLine("Некорректный ввод. Пожалуйста, введите одну цифру.") // вывод комментария пользователю 
+
+
+// ГЛАНВАЯ ФУНКЦИЯ 
+[<EntryPoint>]  // точка входа в главную функцию 
+let main argv =
+    let mutable manualNumbers = [] // Хранит числа, введенные вручную
+    let mutable randomNumbers = [] // Хранит случайные числа
+
+    while true do
+    // вывод комментариев пользователю 
+        Console.WriteLine("Выберите действие:")
+        Console.WriteLine("1. Ввести числа вручную")
+        Console.WriteLine("2. Сгенерировать случайные числа")
+        Console.WriteLine("3. Выполнить поиск цифры в числах")
+        Console.WriteLine("Введите 'q' для выхода.")
+        Console.Write("Ваш выбор (1, 2 или 3): ")
+        let choice = Console.ReadLine()
+        
+        match choice with
+        | "1" -> 
+            if not (List.isEmpty manualNumbers) then
+                Console.Write("Вы уверены, что хотите перезаписать ручные числа? (y/n): ") // вывод комментария пользователю 
+                let confirm = Console.ReadLine().Trim().ToLower()
+                if confirm <> "y" then
+                    Console.WriteLine("Перезапись отменена.") // вывод комментария пользователю 
+                else
+                    manualNumbers <- getInput()
+                    if List.isEmpty manualNumbers then
+                        Console.WriteLine("Список чисел пуст.") // вывод комментария пользователю 
+                    else
+                        let minDigits = List.map minDigit manualNumbers
+                        let originalNumbers = String.Join(", ", List.rev manualNumbers)
+                        let minDigitsString = String.Join(", ", minDigits)
+                        Console.WriteLine("Исходные числа: " + originalNumbers) // вывод комментария пользователю 
+                        Console.WriteLine("Список минимальных цифр: " + minDigitsString) // вывод комментария пользователю 
+            else
+                manualNumbers <- getInput()
+                if List.isEmpty manualNumbers then
+                    Console.WriteLine("Список чисел пуст.")
+                else
+                    let minDigits = List.map minDigit manualNumbers
+                    let originalNumbers = String.Join(", ", List.rev manualNumbers)
+                    let minDigitsString = String.Join(", ", minDigits)
+                    Console.WriteLine("Список минимальных цифр: " + minDigitsString)
+
+        | "2" -> 
+            Console.Write("Введите количество случайных чисел (или 'q' для выхода): ") // вывод комментария пользователю 
+            let countInput = Console.ReadLine()
+            if countInput.Trim().ToLower() = "q" then
+                Console.WriteLine("Выход из программы...") // вывод комментария пользователю 
+                exit 0
+            else
+                match Int32.TryParse(countInput) with
+                | (true, count) when count > 0 ->
+                    randomNumbers <- generateRandomNumbers count
+                    Console.WriteLine("Сгенерированные случайные числа: {0}", String.Join(", ", randomNumbers)) // вывод комментария пользователю 
+                    
+                    // Находим минимальные цифры из случайных чисел
+                    let minDigits = List.map minDigit randomNumbers
+                    let originalNumbers = String.Join(", ", List.rev randomNumbers)
+                    let minDigitsString = String.Join(", ", minDigits)
+                    Console.WriteLine("Список минимальных цифр: " + minDigitsString)
+                | _ -> Console.WriteLine("Некорректный ввод. Пожалуйста, введите положительное число.") // вывод комментария пользователю 
+
+        | "3" -> 
+            if List.isEmpty manualNumbers && List.isEmpty randomNumbers then
+                Console.WriteLine("Сначала введите числа вручную или сгенерируйте их.") // вывод комментария пользователю 
+            else
+                let allNumbers = manualNumbers @ randomNumbers
+                searchDigitInNumbers allNumbers
+
+        | "q" -> 
+            Console.WriteLine("Выход из программы...") // вывод комментария пользователю 
+            exit 0
+
+        | _ -> 
+            Console.WriteLine("Неверный выбор. Пожалуйста, выберите 1, 2 или 3.") // вывод комментария пользователю 
+
+    0 // Возвращаем 0, чтобы указать успешное завершение
