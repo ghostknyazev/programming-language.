@@ -1,0 +1,268 @@
+open System
+
+// РЕШЕНИЕ ЗАДАЧИ 1
+// Функция для нахождения минимальной цифры в числе
+let minDigit (n: int) : int =
+    n.ToString() // Преобразуем число в строку
+    |> Seq.map Char.GetNumericValue // Получаем числовые значения каждого символа
+    |> Seq.map int // Преобразуем значения в целые числа
+    |> Seq.min // Находим минимальное значение
+
+
+// Функция для вывода сообщений пользователю
+let sms1() = 
+    Console.WriteLine("Введите натуральные числа через пробел (или 'q' для выхода в главное меню):") // вывод комментария пользователю 
+
+let sms2() = 
+    Console.WriteLine("Возвращение в главное меню...")
+
+let sms3(s: string) = 
+    Console.WriteLine("'" + s + "' не является натуральным числом или меньше или равно нулю.") // вывод комментария пользователю 
+
+let sms4() = 
+    Console.WriteLine("Не были введены натуральные числа.")  // вывод комментария пользователю
+
+let sms5(numbers: int list) = 
+    Console.WriteLine("Введенные натуральные числа: " + String.Join(", ", numbers)) // Выводим список введенных чисел
+
+// Функция для обработки ввода пользователя
+let rec getInput () =
+    sms1()
+    let input = Console.ReadLine() // Читаем ввод пользователя
+    
+    if input.Trim().ToLower() = "q" then
+        // Возвращаемся в главное меню
+        sms2()
+        []
+    else
+        // Разделяем ввод по пробелам и обрабатываем каждое значение
+        let numbers = 
+            input.Split(' ')
+            |> Seq.fold (fun acc s ->
+                match Int32.TryParse(s.Trim()) with
+                | (true, n) when n > 0 -> n :: acc // Если введено натуральное число, добавляем его в список
+                | _ -> 
+                    // Если ввод некорректен, выводим сообщение об ошибке
+                    sms3(s.Trim()) // Передаем некорректное значение в sms3
+                    acc) []
+        
+        if List.isEmpty numbers then
+            sms4() 
+            getInput () // Запускаем цикл снова для следующего ввода
+        else
+            sms5(numbers) // Передаем список чисел в sms5
+            numbers // Возвращаем список введенных чисел
+
+
+// Функция для генерации случайных чисел от 1 до 100
+let generateRandomNumbers count =
+    let rnd = Random() // Создаем экземпляр генератора случайных чисел
+    [ for _ in 1 .. count -> rnd.Next(1, 100) ] // Генерируем список случайных чисел от 1 до 99
+
+// РЕШЕНИЕ ЗАДАЧИ 2 
+
+let sms6() =   
+    printfn "Введите действительные числа (или 'q' для выхода):"
+
+let sms7(s: string) = 
+    printfn "Некорректное значение: %s." (s.Trim())
+
+let sms8() =   
+    printfn "Список чисел пуст. Попробуйте снова."
+
+let sms9(numbers: float list) = 
+    printfn "Вы ввели числа: %A" (List.rev numbers) // Выводим введенные числа в правильном порядке
+
+// Функция для обработки ввода действительных чисел
+let rec getInput2 () : float list =
+    sms6()
+    let input = Console.ReadLine() // Читаем ввод пользователя
+    
+    if input.Trim().ToLower() = "q" then
+        // Если пользователь вводит 'q', завершаем ввод
+        []
+    else
+        // Разделяем ввод по пробелам и обрабатываем каждое значение
+        let numbers = 
+            input.Split(' ')
+            |> Seq.fold (fun acc s ->
+                match Double.TryParse(s.Trim()) with
+                | (true, n) -> n :: acc // Если введено действительное число, добавляем его в список
+                | _ -> 
+                    // Если ввод некорректен, выводим сообщение об ошибке
+                    sms7(s)
+                    acc) []
+        
+        if List.isEmpty numbers then
+            sms8()
+            getInput2 () // Запускаем цикл снова для следующего ввода
+        else
+            sms9 numbers // Вызываем sms9 и передаем список чисел
+            numbers // Возвращаем список введенных чисел
+
+
+// Функция для генерации случайных действительных чисел
+let generateRandomNumbers2 count =
+    let rnd = Random() // Создаем экземпляр генератора случайных чисел
+    [ for _ in 1 .. count ->  Math.Round((rnd.NextDouble() * 200.0) - 100.0, 3) ] // Генерируем список случайных чисел от -100 до 100
+
+
+// Функция для подсчета количества элементов в списке, содержащих заданную цифру
+let countElementsWithDigit (numbers: float list) (digit: char) : (int * float list) =
+    let digitString = digit.ToString() // Преобразуем цифру в строку для сравнения
+    List.fold (fun (count, foundNumbers) n ->
+        if n.ToString().Contains(digitString) then
+            (count + 1, n :: foundNumbers) // Увеличиваем счетчик и добавляем число в список
+        else
+            (count, foundNumbers) // Возвращаем текущий счетчик и список, если цифра не найдена
+    ) (0, []) numbers // Начинаем с 0 и пустого списка
+
+let sms10() = 
+    Console.Write("Введите цифру для поиска (0-9): ") // вывод комментария пользователю
+
+let sms11(count: int, digit: char) = 
+    Console.WriteLine($"Количество элементов, содержащих цифру {digit}: {count}") // вывод комментария пользователю 
+
+let sms12(foundNumbers: List<float>) = 
+    Console.WriteLine("Числа, содержащие эту цифру: " + String.Join(", ", foundNumbers))
+
+let sms13() = 
+    Console.WriteLine("Нет чисел, содержащих эту цифру.") // вывод комментария пользователю 
+
+let sms14() = 
+    Console.WriteLine("Некорректный ввод. Пожалуйста, введите одну цифру.") // вывод комментария пользователю 
+
+// Функция для поиска цифры в числах
+let searchDigitInNumbers (numbers: List<float>) =
+    // Запрос цифры для поиска
+    sms10()
+    let digitInput = Console.ReadLine()
+
+    match digitInput with
+    | input when input.Length = 1 && Char.IsDigit input.[0] -> 
+        // Если введена одна цифра, выполняем поиск
+        let count, foundNumbers = countElementsWithDigit numbers input.[0] // Убедитесь, что countElementsWithDigit возвращает (int * List<float>)
+        sms11(count, input.[0]) // Передаем количество и цифру в функцию sms11
+        if foundNumbers.Length > 0 then
+            sms12(foundNumbers) // Передаем найденные числа в функцию sms12
+        else
+            sms13()
+    | _ -> 
+        // Если ввод некорректен, выводим сообщение об ошибке
+        sms14()
+
+
+
+[<EntryPoint>] 
+let rec main argv =
+    // Инициализация списков для хранения введенных и сгенерированных чисел
+    let manualNumbers = []
+    let randomNumbers = []
+    let manualRealNumbers = []
+    let randomRealNumbers = []
+
+    // Рекурсивная функция для обработки пользовательского ввода и выполнения действий
+    let rec loop manual random manualReal randomReal =
+        // Вывод меню выбора действий для пользователя
+        Console.WriteLine("Выберите действие:")
+        Console.WriteLine("Получить список из минимальных цифр натуральных чисел, содержащихся в исходном списке:")
+        Console.WriteLine("1. Ввести натуральные числа вручную")
+        Console.WriteLine("2. Сгенерировать случайные натуральные числа")
+        Console.WriteLine("Найти количество элементов списка, в которых встречается заданная цифра:")
+        Console.WriteLine("3. Ввести действительные числа вручную")
+        Console.WriteLine("4. Сгенерировать случайные действительные числа")
+        Console.WriteLine("Введите 'q' для выхода.")
+        Console.Write("Ваш выбор: ")
+        
+        // Чтение выбора пользователя
+        let choice = Console.ReadLine()
+        
+        // Обработка выбора пользователя
+        match choice with
+        | "1" -> 
+            // Ввод натуральных чисел вручную
+            let newManualNumbers = getInput()
+            // Обновление списка введенных чисел
+            let updatedManualNumbers = if List.isEmpty newManualNumbers then manual else manual @ newManualNumbers
+            // Получение минимальных цифр из введенных чисел
+            let minDigits = List.map minDigit updatedManualNumbers
+            Console.WriteLine("Список минимальных цифр: " + String.Join(", ", minDigits))
+            // Рекурсивный вызов для продолжения работы
+            loop updatedManualNumbers random manualReal randomReal
+
+        | "2" -> 
+            // Генерация случайных натуральных чисел
+            Console.Write("Введите количество случайных чисел (или 'q' для выхода): ")
+            let countInput = Console.ReadLine()
+            if countInput.Trim().ToLower() = "q" then
+                Console.WriteLine("Выход из программы...")
+                exit 0
+            else
+                // Проверка корректности введенного числа
+                match Int32.TryParse(countInput) with
+                | (true, count) when count > 0 ->
+                    // Генерация случайных чисел
+                    let generatedNumbers = generateRandomNumbers count
+                    Console.WriteLine("Сгенерированные случайные числа: {0}", String.Join(", ", generatedNumbers))
+                    // Получение минимальных цифр из сгенерированных чисел
+                    let minDigits = List.map minDigit generatedNumbers
+                    Console.WriteLine("Минимальные цифры из сгенерированных чисел: " + String.Join(", ", minDigits))
+                    // Рекурсивный вызов для продолжения работы
+                    loop manual (random @ generatedNumbers) manualReal randomReal
+                | _ -> 
+                    // Обработка некорректного ввода
+                    Console.WriteLine("Некорректный ввод. Пожалуйста, введите положительное число.")
+                    loop manual random manualReal randomReal
+
+        | "3" -> 
+            // Ввод действительных чисел вручную
+            let newManualRealNumbers = getInput2()
+            // Обновление списка введенных действительных чисел
+            let updatedManualRealNumbers = if List.isEmpty newManualRealNumbers then manualReal else manualReal @ newManualRealNumbers
+            Console.WriteLine("Введенные действительные числа: {0}", String.Join(", ", updatedManualRealNumbers))
+    
+            // Преобразование действительных чисел в целые (если необходимо)
+            let intNumbers = List.map float updatedManualRealNumbers
+            // Поиск цифры в введенных числах
+            searchDigitInNumbers intNumbers  // Используем преобразованные числа
+            // Рекурсивный вызов для продолжения работы
+            loop manual random updatedManualRealNumbers randomReal
+
+        | "4" -> 
+            // Генерация случайных действительных чисел
+            Console.Write("Введите количество случайных действительных чисел (или 'q' для выхода): ")
+            let countInput = Console.ReadLine()
+            if countInput.Trim().ToLower() = "q" then
+                Console.WriteLine("Выход из программы...")
+                exit 0
+            else
+                // Проверка корректности введенного числа
+                match Int32.TryParse(countInput) with 
+                | (true, count) when count > 0 ->
+                    // Генерация случайных действительных чисел
+                    let generatedRealNumbers = generateRandomNumbers2 count
+                    Console.WriteLine("Сгенерированные случайные действительные числа: {0}", String.Join(", ", generatedRealNumbers))
+            
+                    // Преобразование действительных чисел в целые (если необходимо)
+                    let intGeneratedNumbers = List.map float generatedRealNumbers
+                    // Поиск цифры в сгенерированных числах
+                    searchDigitInNumbers intGeneratedNumbers  // Используем преобразованные числа
+                    // Рекурсивный вызов для продолжения работы
+                    loop manual random manualReal (randomReal @ generatedRealNumbers)
+                | _ -> 
+                    // Обработка некорректного ввода
+                    Console.WriteLine("Некорректный ввод.")
+                    loop manual random manualReal randomReal
+
+        | "q" -> 
+            // Завершение работы программы
+            Console.WriteLine("Выход из программы...")
+            exit 0
+
+        | _ -> 
+            // Обработка некорректного выбора
+            Console.WriteLine("Некорректный выбор. Пожалуйста, попробуйте снова.")
+            loop manual random manualReal randomReal
+
+    // Запуск основного цикла
+    loop manualNumbers randomNumbers manualRealNumbers randomRealNumbers
