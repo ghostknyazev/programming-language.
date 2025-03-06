@@ -1,4 +1,4 @@
-﻿// МАЛЫШЕНКО ЯРОСЛАВ КМБ-2 ВАРИАНТ 5 
+// МАЛЫШЕНКО ЯРОСЛАВ КМБ-2 ВАРИАНТ 5 
 open System 
 
 // РЕШЕНИЕ ЗАДАЧИ 1
@@ -100,6 +100,7 @@ let Input() =
         printfn "Неверный ввод. Используем значение по умолчанию (10)."
         10 // Значение по умолчанию, если ввод неверный
 
+
 let sms4() = 
     printfn ("Выберите, какую задачу нам решить.")
 let sms5() = 
@@ -131,7 +132,7 @@ let sms17() =
 let sms18() = 
     printfn ("Введите цифру для поиска (0-9):")
 let sms19() = 
-    printfn ("Неверный ввод. Используем 0 по умолчанию.")
+    printfn ("Некорректный ввод. Пожалуйста, введите цифру от 0 до 9.")
 let sms20() =
     printfn ("Неверный выбор, используем случайные числа по умолчанию.")
 let sms21(digit, count) = 
@@ -142,6 +143,18 @@ let sms23(realNumbers) =
      printfn("Список: %A") (realNumbers)
 let sms24() = 
     printf("Введите количество чисел списка: ")
+
+// функция ввода числа с клавиатуры для генерации действ. чисел 
+let rec getDigitInput () =
+    sms18()
+    let digitInput = Console.ReadLine()
+    
+    match Int32.TryParse(digitInput) with
+    | (true, d) when d >= 0 && d <= 9 -> d // Если ввод корректен, возвращаем цифру
+    | _ -> 
+        sms19()
+        getDigitInput () // Запрашиваем ввод снова
+
 
 [<EntryPoint>]
 let main argv =
@@ -194,15 +207,7 @@ let main argv =
         let inputChoice = Console.ReadLine()
 
         // Ввод цифры для поиска
-        sms18()
-        let digitInput = Console.ReadLine()
-
-        let digit =
-            match Int32.TryParse(digitInput) with
-            | (true, d) when d >= 0 && d <= 9 -> d // Проверяем, что цифра в диапазоне 0-9
-            | _ -> 
-                sms19()
-                0
+        let digit = getDigitInput() // запрос числа пользователя 
 
         // Получение действительных чисел
         let realNumbers =
