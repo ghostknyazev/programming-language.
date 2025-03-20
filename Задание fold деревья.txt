@@ -1,0 +1,69 @@
+open System
+
+// Структура узла дерева
+type Leaf = 
+    { value: float; left: Leaf option; right: Leaf option }
+
+// Функция для вставки числа в бинарное дерево
+let rec insertLeaf (tree: Leaf option) (newValue: float) : Leaf option =
+    match tree with
+    | Some node -> 
+        if newValue < node.value then 
+            Some { node with left = insertLeaf node.left newValue }
+        elif newValue > node.value then 
+            Some { node with right = insertLeaf node.right newValue }
+        else 
+            tree // Не добавляем дубликаты
+    | None -> 
+        Some { value = newValue; left = None; right = None }
+
+// Функция fold для обхода дерева
+let rec foldTree f acc tree =
+    match tree with
+    | None -> acc
+    | Some node ->
+        // Сначала обходим левое поддерево, затем текущее значение, затем правое поддерево
+        let accLeft = foldTree f acc node.left
+        let accCurrent = f accLeft node.value
+        foldTree f accCurrent node.right
+
+// Функция для нахождения суммы четных значений в листьях
+let sumEvenLeaves acc value =
+    if value % 2.0 = 0.0 then acc + value else acc
+
+// Функция для ввода действительных чисел с проверкой
+let rec inputNumbers () =
+    printfn "Введите действительное число (или нажмите Enter для завершения ввода): "
+    let input = Console.ReadLine()
+    if String.IsNullOrWhiteSpace(input) then
+        []
+    else
+        match Double.TryParse(input) with
+        | (true, number) -> number :: inputNumbers()
+        | _ -> 
+            printfn "Введено неверное значение. Пожалуйста, введите действительное число."
+            inputNumbers()
+
+// Функция для создания дерева из списка чисел
+let rec createTree (numbers: float list) (tree: Leaf option) : Leaf option =
+    match numbers with
+    | [] -> tree
+    | head :: tail -> 
+        let newTree = insertLeaf tree head
+        createTree tail newTree
+
+// главная функция 
+[<EntryPoint>]
+let main argv =
+    printfn "             Дерево содержит действительные числа. Найти сумму четных значений в листьях."
+    printfn "\n"
+
+    let numberValues = inputNumbers()
+    let tree = createTree numberValues None
+
+    // Находим сумму четных значений в листьях
+    let evenLeavesSum = foldTree sumEvenLeaves 0.0 tree
+
+    printfn "Сумма четных значений в листьях: %.3f" evenLeavesSum
+
+    0
