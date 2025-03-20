@@ -46,7 +46,7 @@ let rec printTree (tree: Leaf option) (indent: string) =
 
 // Функция для ввода слов
 let rec inputWords () =
-    printMessage "Введите слово (или нажмите Enter для завершения ввода): "
+    printMessage "Введите строку (или нажмите Enter для завершения ввода): "
     let input = Console.ReadLine()
     if String.IsNullOrWhiteSpace(input) then
         []
