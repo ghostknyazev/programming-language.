@@ -17,15 +17,6 @@ let rec insertLeaf (tree: Leaf option) (newValue: float) : Leaf option =
     | None -> 
         Some { value = newValue; left = None; right = None }
 
-// Функция для вывода дерева
-let rec printTree (tree: Leaf option) (indent: string) =
-    match tree with
-    | None -> ()
-    | Some node ->
-        printfn "%s%.3f" indent node.value // Форматируем значение узла
-        printTree node.left (indent + "    ")
-        printTree node.right (indent + "    ")
-
 // Функция fold для обхода дерева
 let rec foldTree f acc tree =
     match tree with
@@ -33,16 +24,12 @@ let rec foldTree f acc tree =
     | Some node ->
         // Сначала обходим левое поддерево, затем текущее значение, затем правое поддерево
         let accLeft = foldTree f acc node.left
-        let accCurrent = f accLeft node
+        let accCurrent = f accLeft node.value
         foldTree f accCurrent node.right
 
 // Функция для нахождения суммы четных значений в листьях
-let sumEvenLeaves acc node =
-    match node with
-    | { left = None; right = None; value = value } when value % 2.0 = 0.0 ->
-        printfn "Суммируем: %.3f" value // Форматируем сумму четных значений
-        acc + value
-    | _ -> acc
+let sumEvenLeaves acc value =
+    if value % 2.0 = 0.0 then acc + value else acc
 
 // Функция для ввода действительных чисел с проверкой
 let rec inputNumbers () =
@@ -65,22 +52,62 @@ let rec createTree (numbers: float list) (tree: Leaf option) : Leaf option =
         let newTree = insertLeaf tree head
         createTree tail newTree
 
+// Функция для добавления случайных чисел в дерево
+let addRandomNumbers count tree =
+    let random = Random()
+    let rec addRandom count tree =
+        if count > 0 then
+            let randomValue = random.NextDouble() * 100.0 // Генерируем случайное число от 0 до 100
+            let newTree = insertLeaf tree randomValue
+            addRandom (count - 1) newTree
+        else
+            tree
+    addRandom count tree
+
+// Функция для вывода дерева в виде структуры
+let rec printTreeStructure tree indent =
+    match tree with
+    | None -> ()
+    | Some node ->
+        printfn "%s%.3f" indent node.value
+        printTreeStructure node.left (indent + "   ")
+        printTreeStructure node.right (indent + "   ")
+
 // главная функция 
 [<EntryPoint>]
 let main argv =
     printfn "             Дерево содержит действительные числа. Найти сумму четных значений в листьях."
     printfn "\n"
 
-    let numberValues = inputNumbers()
-    let tree = createTree numberValues None
+    printfn "Выберите способ ввода чисел:"
+    printfn "1. Ввести числа вручную"
+    printfn "2. Добавить случайные числа"
+    let choice = Console.ReadLine()
+
+    let tree =
+        match choice with
+        | "1" -> 
+            let numberValues = inputNumbers()
+            createTree numberValues None
+        | "2" -> 
+            printfn "Введите количество случайных чисел для добавления: "
+            let countInput = Console.ReadLine()
+            match Int32.TryParse(countInput) with
+            | (true, count) -> addRandomNumbers count None
+            | _ -> 
+                printfn "Введено неверное значение. Будет создано пустое дерево."
+                None
+        | _ ->
+            printfn "Некорректный выбор. Будет создано пустое дерево."
+            None
 
     // Выводим дерево
-    printfn "Созданное дерево:"
-    printTree tree ""
+    printfn "Дерево:"
+    printTreeStructure tree ""
 
     // Находим сумму четных значений в листьях
     let evenLeavesSum = foldTree sumEvenLeaves 0.0 tree
 
-    printfn "Сумма четных значений в листьях: %.3f" evenLeavesSum // Форматируем сумму
+    printfn "Сумма четных значений в листьях: %.3f" evenLeavesSum
 
     0
